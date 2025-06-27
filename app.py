@@ -124,7 +124,9 @@ def create_app():
                 
                 if not name or not websites_text or not start_time or not end_time:
                     flash('All fields are required', 'error')
-                    return render_template('add_website.html')
+                    return render_template('add_website.html', 
+                                         name=name, websites=websites_text, 
+                                         start_time=start_time, end_time=end_time)
                 
                 # Parse websites from textarea
                 websites = []
@@ -138,21 +140,43 @@ def create_app():
                 
                 if not websites:
                     flash('At least one website is required', 'error')
-                    return render_template('add_website.html')
+                    return render_template('add_website.html', 
+                                         name=name, websites=websites_text, 
+                                         start_time=start_time, end_time=end_time)
                 
                 schedule_id = db_manager.add_schedule(name, start_time, end_time, websites, enabled)
+                logger.info(f"Successfully added schedule '{name}' with ID: {schedule_id}")
                 
                 if enabled:
                     # Schedule all websites in this schedule
-                    for website in db_manager.get_schedule(schedule_id)['websites']:
-                        scheduler_service.schedule_website(website['id'], website['url'], start_time, end_time)
+                    try:
+                        schedule_data = db_manager.get_schedule(schedule_id)
+                        if schedule_data and 'websites' in schedule_data:
+                            for website in schedule_data['websites']:
+                                try:
+                                    scheduler_service.schedule_website(website['id'], website['url'], start_time, end_time)
+                                    logger.info(f"Scheduled website: {website['url']}")
+                                except Exception as scheduler_error:
+                                    logger.error(f"Error scheduling website {website['url']}: {scheduler_error}")
+                                    # Continue with other websites even if one fails
+                        else:
+                            logger.warning(f"Could not retrieve schedule data for ID: {schedule_id}")
+                    except Exception as schedule_error:
+                        logger.error(f"Error in scheduling process: {schedule_error}")
+                        # Don't fail the entire operation if scheduling fails
                 
                 flash(f'Schedule "{name}" added successfully with {len(websites)} websites', 'success')
                 return redirect(url_for('dashboard'))
                 
             except Exception as e:
                 logger.error(f"Error adding schedule: {e}")
-                flash('Error adding schedule', 'error')
+                logger.error(f"Form data - name: '{name}', websites: '{websites_text}', start: '{start_time}', end: '{end_time}', enabled: {enabled}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                flash('Error adding schedule. Please check the logs for details.', 'error')
+                return render_template('add_website.html', 
+                                     name=name, websites=websites_text, 
+                                     start_time=start_time, end_time=end_time)
         
         return render_template('add_website.html')
     

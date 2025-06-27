@@ -17,7 +17,8 @@
                     <div class="mb-3">
                         <label for="name" class="form-label">Schedule Name</label>
                         <input type="text" class="form-control" id="name" name="name" 
-                               placeholder="e.g., Kid's TV Time, Social Media Block" required>
+                               placeholder="e.g., Kid's TV Time, Social Media Block" 
+                               value="{{ name or '' }}" required>
                         <div class="form-text">
                             Give this schedule a descriptive name
                         </div>
@@ -26,7 +27,7 @@
                     <div class="mb-3">
                         <label for="websites" class="form-label">Website URLs</label>
                         <textarea class="form-control" id="websites" name="websites" rows="4" 
-                                  placeholder="youtube.com&#10;tiktok.com&#10;facebook.com&#10;instagram.com" required></textarea>
+                                  placeholder="youtube.com&#10;tiktok.com&#10;facebook.com&#10;instagram.com" required>{{ websites or '' }}</textarea>
                         <div class="form-text">
                             Enter one website per line. Don't include http:// or https://
                         </div>
@@ -36,7 +37,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="start_time" class="form-label">Block Start Time</label>
-                                <input type="time" class="form-control" id="start_time" name="start_time" required>
+                                <input type="time" class="form-control" id="start_time" name="start_time" 
+                                       value="{{ start_time or '' }}" required>
                                 <div class="form-text">
                                     When to start blocking these websites
                                 </div>
@@ -46,7 +48,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="end_time" class="form-label">Block End Time</label>
-                                <input type="time" class="form-control" id="end_time" name="end_time" required>
+                                <input type="time" class="form-control" id="end_time" name="end_time" 
+                                       value="{{ end_time or '' }}" required>
                                 <div class="form-text">
                                     When to stop blocking these websites
                                 </div>
