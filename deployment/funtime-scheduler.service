@@ -1,0 +1,27 @@
+[Unit]
+Description=FunTime Scheduler - Raspberry Pi Website Scheduler
+After=network.target
+
+[Service]
+Type=exec
+User=aswath
+Group=aswath
+WorkingDirectory=/opt/funtime-scheduler
+Environment=PATH=/opt/funtime-scheduler/venv/bin
+ExecStart=/opt/funtime-scheduler/venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 app:app
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=funtime-scheduler
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/opt/funtime-scheduler/data /opt/funtime-scheduler/logs
+
+[Install]
+WantedBy=multi-user.target

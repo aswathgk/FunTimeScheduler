@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}History - FunTime Scheduler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">
+        <i class="bi bi-journal-text"></i> Block/Unblock History
+    </h1>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+{% if logs %}
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0">Recent Activity (Last 100 entries)</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Website</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <span class="text-nowrap">
+                                        {{ log.timestamp[:19].replace('T', ' ') }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-truncate d-inline-block" style="max-width: 200px;" 
+                                          title="{{ log.website_url }}">
+                                        {{ log.website_url }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if log.action == 'block' %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-shield-x"></i> Block
+                                        </span>
+                                    {% elif log.action == 'unblock' %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-shield-check"></i> Unblock
+                                        </span>
+                                    {% elif log.action == 'manual_block' %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-hand-index"></i> Manual Block
+                                        </span>
+                                    {% elif log.action == 'manual_unblock' %}
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-hand-index"></i> Manual Unblock
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ log.action }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.success %}
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Success
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger" 
+                                              title="{{ log.error_message or 'Unknown error' }}">
+                                            <i class="bi bi-exclamation-triangle"></i> Failed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Card -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Actions</h5>
+                    <h2 class="text-primary">{{ logs|length }}</h2>
+                    <small class="text-muted">Recent entries shown</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Success Rate</h5>
+                    {% set successful = logs|selectattr('success')|list|length %}
+                    {% set total = logs|length %}
+                    {% if total > 0 %}
+                        {% set success_rate = (successful / total * 100)|round(1) %}
+                        <h2 class="{% if success_rate >= 90 %}text-success{% elif success_rate >= 75 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ success_rate }}%
+                        </h2>
+                        <small class="text-muted">{{ successful }}/{{ total }} successful</small>
+                    {% else %}
+                        <h2 class="text-muted">N/A</h2>
+                        <small class="text-muted">No data</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-journal-text" style="font-size: 4rem; color: #dee2e6;"></i>
+        </div>
+        <h3 class="text-muted">No activity logged yet</h3>
+        <p class="text-muted">Block/unblock actions will appear here once your schedules start running.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> Go to Dashboard
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

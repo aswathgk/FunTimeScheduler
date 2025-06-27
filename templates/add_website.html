@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Add Website Schedule - FunTime Scheduler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Add New Website Schedule
+                </h4>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Schedule Name</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               placeholder="e.g., Kid's TV Time, Social Media Block" required>
+                        <div class="form-text">
+                            Give this schedule a descriptive name
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="websites" class="form-label">Website URLs</label>
+                        <textarea class="form-control" id="websites" name="websites" rows="4" 
+                                  placeholder="youtube.com&#10;tiktok.com&#10;facebook.com&#10;instagram.com" required></textarea>
+                        <div class="form-text">
+                            Enter one website per line. Don't include http:// or https://
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_time" class="form-label">Block Start Time</label>
+                                <input type="time" class="form-control" id="start_time" name="start_time" required>
+                                <div class="form-text">
+                                    When to start blocking these websites
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="end_time" class="form-label">Block End Time</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time" required>
+                                <div class="form-text">
+                                    When to stop blocking these websites
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enabled" name="enabled" checked>
+                            <label class="form-check-label" for="enabled">
+                                Enable schedule immediately
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Help Card -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Help
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>Multiple Websites:</strong> Enter one website per line in the text area
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>URL Format:</strong> Enter just the domain (e.g., "facebook.com", "youtube.com")
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>Time Format:</strong> Use 24-hour format (e.g., 09:00 for 9 AM, 17:30 for 5:30 PM)
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>Daily Schedule:</strong> The block schedule repeats every day
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>Instant Effect:</strong> If enabled, all websites in the schedule start blocking immediately if within the time window
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add some JavaScript to help with the textarea
+document.addEventListener('DOMContentLoaded', function() {
+    const websitesTextarea = document.getElementById('websites');
+    const nameInput = document.getElementById('name');
+    
+    // Auto-suggest schedule name based on first website
+    websitesTextarea.addEventListener('input', function() {
+        if (!nameInput.value) {
+            const lines = this.value.split('\n');
+            if (lines.length > 0 && lines[0].trim()) {
+                nameInput.value = `Block ${lines[0].trim()}${lines.length > 1 ? ' and others' : ''}`;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Set default times (optional)
+document.addEventListener('DOMContentLoaded', function() {
+    const startTime = document.getElementById('start_time');
+    const endTime = document.getElementById('end_time');
+    
+    // Set default start time to 9 AM if not set
+    if (!startTime.value) {
+        startTime.value = '09:00';
+    }
+    
+    // Set default end time to 5 PM if not set
+    if (!endTime.value) {
+        endTime.value = '17:00';
+    }
+});
+</script>
+{% endblock %}

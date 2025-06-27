@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FunTime Scheduler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">
+        <i class="bi bi-house"></i> Dashboard
+    </h1>
+    <a href="{{ url_for('add_website') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Schedule
+    </a>
+</div>
+
+{% if schedules %}
+    <div class="row">
+        {% for schedule in schedules %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="card-title mb-0 text-truncate" title="{{ schedule.name }}">
+                            <i class="bi bi-calendar-week"></i> {{ schedule.name }}
+                        </h6>
+                        <span class="badge {% if schedule.enabled %}bg-success{% else %}bg-secondary{% endif %}">
+                            {% if schedule.enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="text-muted small">Block Time</div>
+                                <span class="badge bg-danger time-badge">{{ schedule.start_time }}</span>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small">Unblock Time</div>
+                                <span class="badge bg-success time-badge">{{ schedule.end_time }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="text-muted small mb-1">
+                                <i class="bi bi-globe"></i> Websites ({{ schedule.websites|length }}):
+                            </div>
+                            <div class="small">
+                                {% for website in schedule.websites[:3] %}
+                                    <span class="badge bg-light text-dark me-1 mb-1">{{ website.url }}</span>
+                                {% endfor %}
+                                {% if schedule.websites|length > 3 %}
+                                    <span class="badge bg-secondary mb-1">+{{ schedule.websites|length - 3 }} more</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="text-muted small mb-2">
+                            <i class="bi bi-calendar-plus"></i> Added: {{ schedule.created_at[:10] }}
+                        </div>
+                        
+                        {% if schedule.updated_at != schedule.created_at %}
+                            <div class="text-muted small">
+                                <i class="bi bi-pencil"></i> Updated: {{ schedule.updated_at[:10] }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a href="{{ url_for('edit_website', website_id=website.id) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                    
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a href="{{ url_for('edit_schedule', schedule_id=schedule.id) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            
+                            <form method="POST" action="{{ url_for('toggle_schedule', schedule_id=schedule.id) }}" 
+                                  class="d-inline">
+                                <button type="submit" 
+                                        class="btn btn-outline-{% if schedule.enabled %}warning{% else %}success{% endif %} btn-sm">
+                                    <i class="bi bi-{% if schedule.enabled %}pause{% else %}play{% endif %}"></i>
+                                    {% if schedule.enabled %}Disable{% else %}Enable{% endif %}
+                                </button>
+                            </form>
+                            
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    onclick="confirmDelete('{{ schedule.name }}', {{ schedule.id }})">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-clock-history" style="font-size: 4rem; color: #dee2e6;"></i>
+        </div>
+        <h3 class="text-muted">No schedules created yet</h3>
+        <p class="text-muted">Add your first schedule to start blocking websites.</p>
+        <a href="{{ url_for('add_website') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Your First Schedule
+        </a>
+    </div>
+{% endif %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete the schedule <strong id="deleteWebsiteUrl"></strong>?
+                <br><br>
+                <small class="text-muted">This will delete all websites in this schedule. This action cannot be undone.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function confirmDelete(websiteUrl, websiteId) {
+    document.getElementById('deleteWebsiteUrl').textContent = websiteUrl;
+    document.getElementById('deleteForm').action = '/delete_website/' + websiteId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+{% endblock %}
